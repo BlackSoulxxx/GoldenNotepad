@@ -12,10 +12,11 @@
 #include <asm/pgalloc.h>
 #include <asm/mmu_context.h>
 #include <asm/cacheflush.h>
+#include <asm/fncpy.h>
 #include <asm/mach-types.h>
 #include <asm/system_misc.h>
 
-extern const unsigned char relocate_new_kernel[];
+extern void relocate_new_kernel(void);
 extern const unsigned int relocate_new_kernel_size;
 
 extern unsigned long kexec_start_address;
@@ -108,6 +109,8 @@ void machine_kexec(struct kimage *image)
 {
 	unsigned long page_list;
 	unsigned long reboot_code_buffer_phys;
+	unsigned long reboot_entry = (unsigned long)relocate_new_kernel;
+	unsigned long reboot_entry_phys;
 	void *reboot_code_buffer;
 
 
@@ -125,18 +128,18 @@ void machine_kexec(struct kimage *image)
 	kexec_boot_atags = image->start - KEXEC_ARM_ZIMAGE_OFFSET + KEXEC_ARM_ATAGS_OFFSET;
 
 	/* copy our kernel relocation code to the control code page */
-	memcpy(reboot_code_buffer,
-	       relocate_new_kernel, relocate_new_kernel_size);
+	reboot_entry = fncpy(reboot_code_buffer,
+			     reboot_entry,
+			     relocate_new_kernel_size);
+	reboot_entry_phys = (unsigned long)reboot_entry +
+		(reboot_code_buffer_phys - (unsigned long)reboot_code_buffer);
 
-
-	flush_icache_range((unsigned long) reboot_code_buffer,
-			   (unsigned long) reboot_code_buffer + KEXEC_CONTROL_PAGE_SIZE);
 	printk(KERN_INFO "Bye!\n");
 
 	if (kexec_reinit)
 		kexec_reinit();
 
-	soft_restart(reboot_code_buffer_phys);
+	soft_restart(reboot_entry_phys);
 }
 
 void arch_crash_save_vmcoreinfo(void)
