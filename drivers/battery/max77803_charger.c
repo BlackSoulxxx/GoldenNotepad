@@ -430,7 +430,7 @@ static int max77803_get_charge_current(struct max77803_charger_data *charger)
 	pr_debug("%s: get charge current: %dmA\n", __func__, get_current);
 	return get_current;
 }
-*/
+
 
 /* in soft regulation, current recovery operation */
 static void max77803_recovery_work(struct work_struct *work)
@@ -467,7 +467,8 @@ static void max77803_recovery_work(struct work_struct *work)
 				(charger->soft_reg_recovery_cnt + 1));
 
 		if (charger->siop_level < 100 &&
-			charger->cable_type == POWER_SUPPLY_TYPE_MAINS) {
+			charger->cable_type == POWER_SUPPLY_TYPE_MAINS &&
+			charger->charging_current_max > SIOP_INPUT_LIMIT_CURRENT) {
 			pr_info("%s : LCD on status and revocer current\n", __func__);
 			max77803_set_input_current(charger,
 					SIOP_INPUT_LIMIT_CURRENT);
@@ -913,17 +914,13 @@ static int sec_chg_get_property(struct power_supply *psy,
 		val->intval = max77803_get_health_state(charger);
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-#if defined(max77888_charger)
 		val->intval = max77803_get_input_current(charger);
-#else
-		val->intval = charger->charging_current_max;
-#endif
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_AVG:
 		val->intval = charger->charging_current;
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
-		val->intval = max77803_get_input_current(charger);
+		val->intval = max77803_get_charge_current(charger);
 		break;
 #if defined(CONFIG_BATTERY_SWELLING)
 	case POWER_SUPPLY_PROP_VOLTAGE_MAX:
@@ -1090,7 +1087,8 @@ static int sec_chg_set_property(struct power_supply *psy,
 
 			if (charger->siop_level < 100 &&
 				val->intval == POWER_SUPPLY_TYPE_MAINS) {
-				set_charging_current_max = SIOP_INPUT_LIMIT_CURRENT;
+				if (set_charging_current_max > SIOP_INPUT_LIMIT_CURRENT)
+					set_charging_current_max = SIOP_INPUT_LIMIT_CURRENT;
 				if (set_charging_current > SIOP_CHARGING_LIMIT_CURRENT)
 					set_charging_current = SIOP_CHARGING_LIMIT_CURRENT;
 			}
@@ -1163,6 +1161,13 @@ static int sec_chg_set_property(struct power_supply *psy,
 					set_charging_current_max = SIOP_INPUT_LIMIT_CURRENT;
 				else
 					set_charging_current_max = charger->charging_current_max;
+
+				max77803_set_input_current(charger, set_charging_current_max);
+
+				if (charger->siop_level < 100)
+					if (current_now > SIOP_CHARGING_LIMIT_CURRENT)
+						current_now = SIOP_CHARGING_LIMIT_CURRENT;
+			}
 
 				max77803_set_input_current(charger, set_charging_current_max);
 
