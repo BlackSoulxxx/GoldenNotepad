@@ -81,8 +81,8 @@ DHDCFLAGS += -DCUSTOM_KEEP_ALIVE_SETTING=30000
 # Extended HANG event with reason codes
 DHDCFLAGS += -DDHD_USE_EXTENDED_HANG_REASON
 
-# For special PNO Event keep wake lock for 10sec
-DHDCFLAGS += -DCUSTOM_PNO_EVENT_LOCK_xTIME=10
+# For special PNO Event keep wake lock for 3sec
+DHDCFLAGS += -DCUSTOM_PNO_EVENT_LOCK_xTIME=3
 
 # Early suspend
 DHDCFLAGS += -DDHD_USE_EARLYSUSPEND
