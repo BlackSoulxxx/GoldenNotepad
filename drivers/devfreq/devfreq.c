@@ -22,6 +22,7 @@
 #include <linux/devfreq.h>
 #include <linux/workqueue.h>
 #include <linux/platform_device.h>
+#include <linux/sysfs_helpers.h>
 #include <linux/list.h>
 #include <linux/printk.h>
 #include <linux/hrtimer.h>
@@ -587,6 +588,65 @@ static ssize_t show_max_freq(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "%lu\n", to_devfreq(dev)->max_freq);
 }
 
+static ssize_t store_volt_table(struct device *d, struct device_attribute *attr,
+			      const char *buf, size_t count)
+{
+	struct devfreq *df = to_devfreq(d);
+	struct device *dev = df->dev.parent;
+	struct device_opp *dev_opp = find_device_opp(dev);
+	struct opp *temp_opp;
+	int u[15];
+	int rest, t, i = 0;
+
+	if ((t = read_into((int*)&u, 15, buf, count)) < 0)
+		return -EINVAL;
+
+	mutex_lock(&df->lock);
+	if (t == 2 && 15 != 2) {
+		temp_opp = opp_find_freq_exact(dev, u[0], true);
+		if(IS_ERR(temp_opp))
+			return -EINVAL;
+
+		if ((rest = (u[1] % 6250)) != 0) u[1] += 6250 - rest;
+		sanitize_min_max(u[1], 600000, 1100000);
+		temp_opp->u_volt = u[1];
+	} else {
+		list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+			if (temp_opp->available) {
+				if ((rest = (u[i] % 6250)) != 0) u[i] += 6250 - rest;
+				sanitize_min_max(u[i], 600000, 1100000);
+				temp_opp->u_volt = u[i++];
+			}
+		}
+	}
+
+	mutex_unlock(&df->lock);
+
+	return count;
+}
+
+static ssize_t show_volt_table(struct device *d, struct device_attribute *attr,
+			     char *buf)
+{
+	struct devfreq *df = to_devfreq(d);
+	struct device *dev = df->dev.parent;
+	struct device_opp *dev_opp = find_device_opp(dev);
+	struct opp *temp_opp;
+	int len = 0;
+
+	if (IS_ERR_OR_NULL(dev_opp))
+		return -EINVAL;
+
+	list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+		if (temp_opp->available)
+			len += sprintf(buf + len, "%lu %lu\n",
+					opp_get_freq(temp_opp),
+					opp_get_voltage(temp_opp));
+	}
+
+	return len;
+}
+
 static struct device_attribute devfreq_attrs[] = {
 	__ATTR(governor, S_IRUGO, show_governor, NULL),
 	__ATTR(cur_freq, S_IRUGO, show_freq, NULL),
@@ -595,6 +655,7 @@ static struct device_attribute devfreq_attrs[] = {
 	       store_polling_interval),
 	__ATTR(min_freq, S_IRUGO | S_IWUSR, show_min_freq, store_min_freq),
 	__ATTR(max_freq, S_IRUGO | S_IWUSR, show_max_freq, store_max_freq),
+	__ATTR(volt_table, S_IRUGO | S_IWUSR, show_volt_table, store_volt_table),
 	{ },
 };
 
