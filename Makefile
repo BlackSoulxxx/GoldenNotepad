@@ -241,11 +241,11 @@ export KCONFIG_CONFIG
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
-TWEAK        = -mvectorize-with-neon-quad -ftree-vectorize -mcpu=cortex-a15.cortex-a7 -mfpu=neon-vfpv4
+TWEAK        = -ftree-vectorize -march=armv7-a
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer
-HOSTCXXFLAGS = -Ofast
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer $(TWEAK)
+HOSTCXXFLAGS = -Ofast $(TWEAK)
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
