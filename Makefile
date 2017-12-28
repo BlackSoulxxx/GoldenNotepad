@@ -242,10 +242,11 @@ export KCONFIG_CONFIG
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
+TWEAK        = -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -funsafe-math-optimizations -fbranch-target-load-optimize -fbranch-target-load-optimize2 -fstdarg-opt
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer
-HOSTCXXFLAGS = -Ofast -mtune=cortex-a15.cortex-a7
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89 $(TWEAK)
+HOSTCXXFLAGS = -Ofast -mtune=cortex-a15.cortex-a7 $(TWEAK)
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -367,7 +368,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security -Wno-unused \
-		   -fno-delete-null-pointer-checks
+		   -fno-delete-null-pointer-checks $(TWEAK)
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
