@@ -242,7 +242,7 @@ export KCONFIG_CONFIG
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
-# TWEAK        = -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -funsafe-math-optimizations -fbranch-target-load-optimize -fbranch-target-load-optimize2 -fstdarg-opt
+TWEAK        = -Ofast -mfpu=neon-vfpv4 -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -fstdarg-opt -ftree-vectorize -mvectorize-with-neon-quad
 HOSTCC       = gcc
 HOSTCXX      = g++
 HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89
@@ -347,10 +347,10 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-CFLAGS_MODULE   = -Ofast -mfpu=neon-vfpv4
+CFLAGS_MODULE   = $(TWEAK)
 AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
-CFLAGS_KERNEL	= -Ofast -mfpu=neon-vfpv4
+CFLAGS_KERNEL	= $(TWEAK)
 AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
