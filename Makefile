@@ -242,11 +242,11 @@ export KCONFIG_CONFIG
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
-TWEAK        = -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -funsafe-math-optimizations -fbranch-target-load-optimize -fbranch-target-load-optimize2 -fstdarg-opt
+# TWEAK        = -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -funsafe-math-optimizations -fbranch-target-load-optimize -fbranch-target-load-optimize2 -fstdarg-opt
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89 $(TWEAK)
-HOSTCXXFLAGS = -Ofast -mtune=cortex-a15.cortex-a7 $(TWEAK)
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89
+HOSTCXXFLAGS = -Ofast -mtune=cortex-a15.cortex-a7
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -347,10 +347,10 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-CFLAGS_MODULE   =
+CFLAGS_MODULE   = -Ofast -mfpu=neon-vfpv4
 AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
-CFLAGS_KERNEL	=
+CFLAGS_KERNEL	= -Ofast -mfpu=neon-vfpv4
 AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
