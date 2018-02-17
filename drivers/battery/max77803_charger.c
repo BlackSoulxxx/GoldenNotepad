@@ -1168,13 +1168,6 @@ static int sec_chg_set_property(struct power_supply *psy,
 					if (current_now > SIOP_CHARGING_LIMIT_CURRENT)
 						current_now = SIOP_CHARGING_LIMIT_CURRENT;
 			}
-
-				max77803_set_input_current(charger, set_charging_current_max);
-
-				if (charger->siop_level < 100)
-					if (current_now > SIOP_CHARGING_LIMIT_CURRENT)
-						current_now = SIOP_CHARGING_LIMIT_CURRENT;
-			}
 			max77803_set_charge_current(charger, current_now);
 
 		}
