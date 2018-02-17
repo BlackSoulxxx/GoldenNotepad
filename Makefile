@@ -242,7 +242,7 @@ export KCONFIG_CONFIG
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
-TWEAK        = -Ofast -mfpu=neon-vfpv4 -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -fstdarg-opt -ftree-vectorize -mvectorize-with-neon-quad
+TWEAK        = -Ofast -mfpu=neon-vfpv4 -pipe -fmodulo-sched -fmodulo-sched-allow-regmoves -fgcse-sm -fgcse-las -fgcse-after-reload -flive-range-shrinkage -fsched-pressure -fsched-spec-load -fsched-spec-load-dangerous -fipa-pta -fivopts -fstdarg-opt -ftree-vectorize -mvectorize-with-neon-quad -mtune=cortex-a15.cortex-a7
 HOSTCC       = gcc
 HOSTCXX      = g++
 HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89
