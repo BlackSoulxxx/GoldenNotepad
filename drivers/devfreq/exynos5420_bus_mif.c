@@ -110,7 +110,7 @@ struct busfreq_data_mif {
 };
 
 enum mif_bus_idx {
-	LV_0 = 0,
+	LV_0,
 	LV_1,
 	LV_2,
 	LV_3,
@@ -132,7 +132,7 @@ struct mif_bus_opp_table {
 };
 
 struct mif_bus_opp_table mif_bus_opp_list[] = {
-	{LV_0, 800000, 1050000, 0},
+	{LV_0, 933000, 1075000, 0},
 	{LV_1, 733000, 1037500, 0},
 	{LV_2, 667000, 1012500, 0},
 	{LV_3, 533000,  937500, 0},
@@ -147,7 +147,7 @@ struct mif_bus_opp_table mif_bus_opp_list[] = {
 
 static unsigned int exynos5420_dram_param[][3] = {
 	/* timiningRow, timingData, timingPower */
-	{0x345A96D3, 0x3630065C, 0x50380336},	/* 800Mhz */
+	{0x345A96D3, 0x3630065C, 0x545B0446},	/* 933Mhz */
 	{0x30598651, 0x3630065C, 0x4C340336},	/* 733Mhz */
 	{0x2C4885D0, 0x3630065C, 0x442F0335},	/* 667Mhz */
 	{0x2347648D, 0x2620065C, 0x38260225},	/* 533Mhz */
@@ -712,7 +712,7 @@ static int exynos5_mif_bus_get_dev_status(struct device *dev,
 }
 
 static struct devfreq_dev_profile exynos5_mif_devfreq_profile = {
-	.initial_freq	= 800000,
+	.initial_freq	= 933000,
 	.polling_ms	= 100,
 	.target		= exynos5_mif_busfreq_target,
 	.get_dev_status	= exynos5_mif_bus_get_dev_status,
