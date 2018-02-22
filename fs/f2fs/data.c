@@ -1740,8 +1740,12 @@ out:
 }
 
 static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
+#ifdef CONFIG_AIO_OPTIMIZATION
+		struct iov_iter *iter, loff_t offset)
+#else
 				const struct iovec *iov, loff_t offset,
 				unsigned long nr_segs)
+#endif
 {
 	struct address_space *mapping = iocb->ki_filp->f_mapping;
 	struct inode *inode = mapping->host;
@@ -1760,8 +1764,13 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 	trace_f2fs_direct_IO_enter(inode, offset, count, rw);
 
 	down_read(&F2FS_I(inode)->dio_rwsem[rw]);
+#ifdef CONFIG_AIO_OPTIMIZATION
+	err = blockdev_direct_IO(rw, iocb, inode, iter, offset,
+							get_data_block_dio);
+#else
 	err = blockdev_direct_IO(rw, iocb, inode, iov, offset, nr_segs,
 							get_data_block_dio);
+#endif
 	up_read(&F2FS_I(inode)->dio_rwsem[rw]);
 	if (err < 0 && (rw & WRITE)) {
 		if (err > 0)
