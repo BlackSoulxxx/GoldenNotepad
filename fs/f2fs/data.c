@@ -1736,7 +1736,7 @@ static ssize_t check_direct_IO(struct inode *inode, int rw,
 		 * iovec, if so return EINVAL, otherwise we'll get csum errors
 		 * when reading back.
 		 */
-		for (i = seg + 1; i < nr_segs; i++) {
+		for (i = seg + 1; i < iter->nr_segs; i++) {
 			if (iov[seg].iov_base == iov[i].iov_base)
 				goto out;
 		}
@@ -1779,7 +1779,7 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 {
 	struct address_space *mapping = iocb->ki_filp->f_mapping;
 	struct inode *inode = mapping->host;
-	size_t count = iov_length(iov, nr_segs);
+	size_t count = iov_iter_count(iter);
 	int err;
 
 #ifdef CONFIG_AIO_OPTIMIZATION
