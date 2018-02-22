@@ -1700,7 +1700,11 @@ static int f2fs_write_end(struct file *file,
 }
 
 static ssize_t check_direct_IO(struct inode *inode, int rw,
+#ifdef CONFIG_AIO_OPTIMIZATION
+		struct iov_iter *iter, loff_t offset)
+#else
 		const struct iovec *iov, loff_t offset, unsigned long nr_segs)
+#endif
 {
 	unsigned blocksize_mask = inode->i_sb->s_blocksize - 1;
 	int seg, i;
@@ -1713,6 +1717,31 @@ static ssize_t check_direct_IO(struct inode *inode, int rw,
 		return -EINVAL;
 
 	/* Check the memory alignment.  Blocks cannot straddle pages */
+#ifdef CONFIG_AIO_OPTIMIZATION
+	for (seg = 0; seg < iter->nr_segs; seg++) {
+		const struct iovec *iov = iov_iter_iovec(iter);
+
+		addr = (unsigned long)iov[seg].iov_base;
+		size = iov[seg].iov_len;
+		end += size;
+		if ((addr & blocksize_mask) || (size & blocksize_mask))
+			goto out;
+
+		/* If this is a write we don't need to check anymore */
+		if (rw & WRITE)
+			continue;
+
+		/*
+		 * Check to make sure we don't have duplicate iov_base's in this
+		 * iovec, if so return EINVAL, otherwise we'll get csum errors
+		 * when reading back.
+		 */
+		for (i = seg + 1; i < nr_segs; i++) {
+			if (iov[seg].iov_base == iov[i].iov_base)
+				goto out;
+		}
+	}
+#else
 	for (seg = 0; seg < nr_segs; seg++) {
 		addr = (unsigned long)iov[seg].iov_base;
 		size = iov[seg].iov_len;
@@ -1734,6 +1763,7 @@ static ssize_t check_direct_IO(struct inode *inode, int rw,
 				goto out;
 		}
 	}
+#endif
 	retval = 0;
 out:
 	return retval;
@@ -1752,7 +1782,11 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 	size_t count = iov_length(iov, nr_segs);
 	int err;
 
+#ifdef CONFIG_AIO_OPTIMIZATION
+	err = check_direct_IO(inode, rw, iter, offset);
+#else
 	err = check_direct_IO(inode, rw, iov, offset, nr_segs);
+#endif
 	if (err)
 		return err;
 
