@@ -272,7 +272,7 @@
 /*
  * Configuration information
  */
-#define INPUT_POOL_WORDS 128
+#define INPUT_POOL_WORDS 256
 #define OUTPUT_POOL_WORDS 32
 #define SEC_XFER_SIZE 512
 #define EXTRACT_SIZE 10
@@ -726,8 +726,6 @@ out:
 void add_input_randomness(unsigned int type, unsigned int code,
 				 unsigned int value)
 {
-/* random: prevent add_input from doing anything */
-#if 0
 	static unsigned char last_value;
 
 	/* ignore autorepeat and the like */
@@ -738,8 +736,6 @@ void add_input_randomness(unsigned int type, unsigned int code,
 	last_value = value;
 	add_timer_randomness(&input_timer_state,
 			     (type << 4) ^ code ^ (code >> 4) ^ value);
-#endif
-	return;
 }
 EXPORT_SYMBOL_GPL(add_input_randomness);
 
@@ -1157,12 +1153,6 @@ void rand_initialize_disk(struct gendisk *disk)
 static ssize_t
 random_read(struct file *file, char __user *buf, size_t nbytes, loff_t *ppos)
 {
-/*
-random: entropy tweaks are all the rage nowadays
-use nonblocking for all.  Read this web page:
-http://lwn.net/Articles/489734/ - WIP
-*/
-#if 0
 	ssize_t n, retval = 0, count = 0;
 
 	if (nbytes == 0)
@@ -1214,8 +1204,6 @@ http://lwn.net/Articles/489734/ - WIP
 	}
 
 	return (count ? count : retval);
-#endif
-	return extract_entropy_user(&nonblocking_pool, buf, nbytes);
 }
 
 static ssize_t
