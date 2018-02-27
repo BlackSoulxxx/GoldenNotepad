@@ -180,7 +180,7 @@ static struct dw_mci_board universal5420_dwmci0_pdata __initdata = {
 				  DW_MCI_QUIRK_HIGHSPEED |
 				  DW_MCI_QUIRK_NO_DETECT_EBIT |
 				  DW_MMC_QUIRK_USE_FINE_TUNING,
-	.bus_hz			= 666 * 1000 * 1000 / 4,
+	.bus_hz			= 666 * 1000 * 1000 / 2,
 	.caps			= MMC_CAP_CMD23 | MMC_CAP_8_BIT_DATA |
 				  MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
 				  MMC_CAP_ERASE | MMC_CAP_HW_RESET,
@@ -585,7 +585,7 @@ static struct dw_mci_board universal5420_dwmci2_pdata __initdata = {
 	.num_slots		= 1,
 	.ch_num			= 2,
 	.quirks			= DW_MCI_QUIRK_HIGHSPEED | DW_MMC_QUIRK_NO_VOLSW_INT,
-	.bus_hz			= 666 * 1000 * 1000 / 4,
+	.bus_hz			= 666 * 1000 * 1000 / 2,
 	.caps			= MMC_CAP_CMD23 |
 				  MMC_CAP_4_BIT_DATA |
 				  MMC_CAP_SD_HIGHSPEED |
